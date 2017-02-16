@@ -1,6 +1,9 @@
 var request = require('request');
 var cheerio = require('cheerio');
 var url     = require('url');
+var agents  = require('fake-user-agent');
+
+var availAgents = ["IE7", "IE8", "IE9", "IPHONE_IOS5", "IPHONE_IOS4", "IPAD_IOS5", "IPAD_IOS4", "WP7", "MAC_SAFARI5"];
 
 function search(options, callback) {
 
@@ -36,7 +39,7 @@ function search(options, callback) {
     });
 
     newResults.forEach(function(result) {
-      callback(null, result);
+      callback(null, result, newResults.length);
     });
 
     if(newResults.length === 0) {
@@ -51,13 +54,19 @@ function search(options, callback) {
     }
   });
 
+  function getRandomAgent() {
+      return availAgents[Math.floor(Math.random() * availAgents.length)];
+  }
 
   function getPage(params, callback) {
     session.get({
         uri: 'https://' + host + '/search',
         qs: params,
-        followRedirect: false
-      }, 
+        followRedirect: false,
+        headers: {
+            "User-Agent": agents[getRandomAgent()]
+        }
+      },
       function(err, res) {
         if(err) return callback(err);
 
